@@ -162,3 +162,120 @@ async function fetchWeatherByCoords (lat ,lon) {
         }
 
 }
+
+// save a city to localStorage after they are been searched 
+    function saveCityToStorage (cityName) {
+
+        if (Boolean(cityName) === false) {
+
+            return;
+        }
+
+        // get existing cities from localStorage or empty array 
+            var rawData = localStorage.getItem("recentCities");
+            var cities;
+            
+            //checking if the data is truthy or not empty 
+                if (Boolean(rawData) === true){
+
+                    cities = JSON.parse(rawData);
+                }
+            // if empty 
+                else {
+
+                    cities = [];
+
+                }
+        // remove duplicate cities 
+            cities = cities.filter(function (a) {
+
+                if (a.toLowerCase === cityName.toLowerCase) {
+
+                // if it matches remove it 
+                    return false ;
+                }
+
+                else {
+                // if not save it 
+                    return true; 
+                }
+            });
+        
+            // add cities to the front 
+                cities.unsift(cityName);
+            
+            // keep only 5 elements 
+                if (cities.length > 5) {
+
+                    cities.pop()
+                }
+
+                // save cities back 
+                    localStorage.setItem("recentCities", JSON.stringify(cities));
+                
+    }
+
+// load recentCities from localStorage 
+// send it to html page
+    function loadRecentCities () {
+
+        var recentContainer = document.getElementById("recentContainer");
+        var recentSelect = document.getElementById("recentSelect");
+
+        // loading reccnt cities and populating 
+        // the  dropdown 
+        var rawData = localStorage.getItem("recentCities");
+        var cities;
+            
+            //checking if the data is truthy or not empty 
+                if (Boolean(rawData) === true){
+
+                    cities = JSON.parse(rawData);
+                }
+            // if empty 
+                else {
+
+                    cities = [];
+
+                }
+        
+        // clearing all the options expect the first place holder 
+            while (recentSelect.options.length > 1){
+            // remove the element at the number one position
+                recentSelect.remove(1);
+            }
+
+        // adding cities to select tag 
+            for (var i = 0; i < cities.length; i++){
+                // add the elements in dropdown 
+                    var options = document.createElement("option");
+                    options.value = cities[i];
+                    options.textContent = cities[i];
+                    recentSelect.appendChild(options);
+
+            }
+
+        // show or hide a options 
+            if (cities,lenght > 1) {
+                recentContainer.classList.remove("hidden");
+            }
+            else {
+                recentContainer.classList.add("hidden");
+            }
+    }
+
+
+
+// if a city has been selected from recentCity then: 
+    function onRecentCitySelected () {
+
+        var recentSelect = document.getElementById("recentSelect");
+        var selectedCity = recentSelect.value;
+        // checking for invaild data 
+            if (Boolean(selectedCity === true)){
+                // fetch the weather 
+                    displayWeather(selectedCity);
+                // reset to default 
+                    recentSelect.value = "";
+            }
+    }
