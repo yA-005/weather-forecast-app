@@ -60,29 +60,27 @@ function displayWeather(data) {
     var errorMsg = document.getElementById('errorMsg');
     errorMsg.classList.add('hidden');
 
-    
-    
-    
-    // extract temp
-        var temp = data.main.temp;
-    // extract humidity 
-        var humidity = data.main.humidity;
-    
-    // extract windSpeed
-        var windSpeed = data.wind.speed;
-    // extract description
-        var description = data.weather[0].description;
-     // extract city name
-        var cityName = data.name;
-
-    // insert the data into HTML 
+    var temp = data.main.temp;
+    var humidity = data.main.humidity;
+    var windSpeed = data.wind.speed;
+    var description = data.weather[0].description;
+    var cityName = data.name;
+    var iconCode = data.weather[0].icon;
+    var iconUrl = '<https://openweathermap.org/img/wn/>' + iconCode + '@2x.png';
 
     weatherInfo.innerHTML = `
-        <h2 class="text-xl font-semibold">${cityName}</h2>
-        <p class="text-3xl font-bold">${temp}°C</p>
-        <p class="capitalize">${description}</p>
-        <p>Humidity: ${humidity}%</p>
-        <p>Wind: ${windSpeed} m/s</p>
+        <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-gray-800">${cityName}</h2>
+            <img src="${iconUrl}" alt="${description}" class="w-16 h-16">
+        </div>
+        <div class="mt-2">
+            <p class="text-4xl font-bold text-blue-600">${Math.round(temp)}°C</p>
+            <p class="text-gray-600 capitalize">${description}</p>
+        </div>
+        <div class="mt-4 flex justify-between text-gray-700">
+            <p>💧 Humidity: ${humidity}%</p>
+            <p>🌬️ Wind: ${windSpeed} m/s</p>
+        </div>
     `;
     weatherInfo.classList.remove('hidden');
 }
