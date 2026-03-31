@@ -1,42 +1,43 @@
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Weather Forecast App</title>
-    
     <script src="<https://cdn.tailwindcss.com>"></script>
-    
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gradient-to-br from-blue-400 to-purple-500 min-h-screen flex items-center justify-center p-4">
+<body id="appBody" class="bg-gradient-to-br from-blue-400 to-purple-500 min-h-screen flex items-center justify-center p-4 transition-all duration-500">
     <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-4xl p-6 transition-all">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">🌦️ Weather Forecast</h1>
 
-        <!-- Search Section -->
+        <!-- Search and Toggle Section -->
         <div class="flex flex-col sm:flex-row gap-3 mb-4">
             <div class="flex-1 relative">
                 <input type="text" id="cityInput" placeholder="Enter city name..."
-                       class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                       class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <span class="absolute left-3 top-3 text-gray-400">🔍</span>
             </div>
             <button id="searchBtn"
-                    class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition duration-200 shadow-md">
+                    class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition shadow-md">
                 Search
             </button>
             <button id="locationBtn"
-                    class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition duration-200 shadow-md">
+                    class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition shadow-md">
                 📍 My Location
+            </button>
+            <button id="unitToggle"
+                    class="bg-gray-600 text-white px-6 py-3 rounded-xl hover:bg-gray-700 transition shadow-md">
+                °C / °F
             </button>
         </div>
 
         <!-- Recent Cities Dropdown -->
         <div id="recentContainer" class="mb-4 hidden">
             <label class="block text-sm font-medium text-gray-700 mb-1">Recent Cities:</label>
-            <select id="recentSelect" class="w-full p-2 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-blue-500">
+            <select id="recentSelect" class="w-full p-2 border border-gray-300 rounded-xl bg-white">
                 <option value="">-- Select a city --</option>
             </select>
         </div>
@@ -44,17 +45,29 @@
         <!-- Error Message -->
         <div id="errorMsg" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded mb-4"></div>
 
-        <!-- Current Weather Card -->
-        <div id="weatherInfo" class="hidden bg-white rounded-xl shadow-lg p-5 mb-6 transition-all">
-            <!-- Dynamically filled by JavaScript -->
+        <!-- Extreme Temperature Alert Banner -->
+        <div id="alertBanner" class="hidden bg-red-500 text-white p-3 rounded-lg mb-4 flex items-center">
+            <span class="text-xl mr-2">⚠️</span>
+            <span id="alertText">Extreme temperature alert!</span>
         </div>
 
-        <!-- 5-Day Forecast Section -->
+        <!-- Current Weather Card -->
+        <div id="weatherInfo" class="hidden bg-white rounded-xl shadow-lg p-5 mb-6 transition-all">
+            <!-- Filled by JS -->
+        </div>
+
+        <!-- 5-Day Forecast -->
         <div id="forecastSection" class="hidden mt-6">
             <h3 class="text-xl font-semibold text-gray-800 mb-3">📅 5-Day Forecast</h3>
             <div id="forecastContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <!-- Forecast cards will be inserted here -->
+                <!-- Forecast cards -->
             </div>
+        </div>
+
+        <!-- Loading Spinner (optional) -->
+        <div id="loadingSpinner" class="hidden text-center py-4">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <p class="mt-2 text-gray-600">Loading...</p>
         </div>
     </div>
 
