@@ -1,9 +1,12 @@
 
 
-var API_KEY = '9143f882f9b5c6f5c3b164d38ca52005';
-var isCelsius = true;
-var currentCelsiusTemp = null;
 
+
+var API_KEY = '9143f882f9b5c6f5c3b164d38ca52005'; 
+var isCelsius = true;   
+var currentCelsiusTemp = null;  
+
+// ---------- DOM Content Loaded ----------
 document.addEventListener('DOMContentLoaded', function() {
     var cityInput = document.getElementById('cityInput');
     var searchBtn = document.getElementById('searchBtn');
@@ -12,7 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var weatherInfo = document.getElementById('weatherInfo');
     var errorMsg = document.getElementById('errorMsg');
     var recentSelect = document.getElementById('recentSelect');
+    var clearRecentBtn = document.getElementById('clearRecentBtn');
 
+    // Search button click
     searchBtn.addEventListener('click', function() {
         var city = cityInput.value.trim();
         if (city === "") {
@@ -24,19 +29,30 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchFiveDayForecast(city);
     });
 
+    // My Location button click
     locationBtn.addEventListener('click', function() {
         getLocationAndFetchWeather();
     });
 
+    // Unit toggle button click
     unitToggle.addEventListener('click', function() {
         toggleTemperatureUnit();
     });
 
+    // Recent cities dropdown change
     recentSelect.addEventListener('change', onRecentCitySelected);
 
-    loadRecentCities();
+    // Clear recent cities button click
+    if (clearRecentBtn !== null) {
+        clearRecentBtn.addEventListener('click', function() {
+            clearRecentCities();
+        });
+    }
+
+    loadRecentCities(); // load recent cities from localStorage on startup
 });
 
+// ---------- Helper Functions ----------
 function showLoading(show) {
     var spinner = document.getElementById('loadingSpinner');
     if (show === true) {
@@ -60,11 +76,13 @@ function hideError() {
     errorMsg.classList.add('hidden');
 }
 
+// ---------- Dynamic Background ----------
 function updateBackground(condition) {
     var body = document.getElementById('appBody');
+    // Reset classes
     body.className = '';
     body.classList.add('min-h-screen', 'flex', 'items-center', 'justify-center', 'p-4', 'transition-all', 'duration-500');
-    
+
     if (condition === 'Clear') {
         body.classList.add('bg-gradient-to-br', 'from-yellow-400', 'to-orange-500');
     } else if (condition === 'Clouds') {
@@ -76,10 +94,12 @@ function updateBackground(condition) {
     } else if (condition === 'Thunderstorm') {
         body.classList.add('bg-gradient-to-br', 'from-purple-800', 'to-black');
     } else {
+        // Default gradient
         body.classList.add('bg-gradient-to-br', 'from-blue-400', 'to-purple-500');
     }
 }
 
+// ---------- Extreme Temperature Alert ----------
 function showExtremeAlert(tempCelsius) {
     var alertBanner = document.getElementById('alertBanner');
     var alertText = document.getElementById('alertText');
@@ -94,12 +114,13 @@ function showExtremeAlert(tempCelsius) {
     }
 }
 
+// ---------- Display Current Weather ----------
 function displayWeather(data) {
     var weatherInfo = document.getElementById('weatherInfo');
     var errorMsg = document.getElementById('errorMsg');
     errorMsg.classList.add('hidden');
     hideError();
-    
+
     var tempC = data.main.temp;
     var humidity = data.main.humidity;
     var windSpeed = data.wind.speed;
@@ -108,15 +129,13 @@ function displayWeather(data) {
     var iconCode = data.weather[0].icon;
     var iconUrl = 'https://openweathermap.org/img/wn/' + iconCode + '@2x.png';
     var condition = data.weather[0].main;
-    
+
     currentCelsiusTemp = tempC;
-    
     updateBackground(condition);
-    
     showExtremeAlert(tempC);
-    
+
     var displayTemp = isCelsius ? Math.round(tempC) + '°C' : Math.round((tempC * 9/5) + 32) + '°F';
-    
+
     weatherInfo.innerHTML = `
         <div class="flex items-center justify-between">
             <h2 class="text-2xl font-bold text-gray-800">${cityName}</h2>
@@ -135,9 +154,10 @@ function displayWeather(data) {
     showLoading(false);
 }
 
+// ---------- Temperature Unit Toggle ----------
 function toggleTemperatureUnit() {
     if (currentCelsiusTemp === null || currentCelsiusTemp === undefined) {
-        return;
+        return; // No weather data yet
     }
     isCelsius = !isCelsius;
     var weatherInfo = document.getElementById('weatherInfo');
@@ -150,6 +170,7 @@ function toggleTemperatureUnit() {
     }
 }
 
+// ---------- Current Weather by City ----------
 async function fetchWeather(city) {
     var url = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + API_KEY + '&units=metric';
     try {
@@ -171,6 +192,7 @@ async function fetchWeather(city) {
     }
 }
 
+// ---------- Current Weather by Coordinates (Geolocation) ----------
 function getLocationAndFetchWeather() {
     if (navigator.geolocation === undefined) {
         showError("Geolocation is not supported by your browser.");
@@ -208,6 +230,7 @@ async function fetchWeatherByCoords(lat, lon) {
         }
         var data = await response.json();
         displayWeather(data);
+      
         fetchFiveDayForecastByCoords(lat, lon);
     } catch (error) {
         showError(error.message);
@@ -215,6 +238,7 @@ async function fetchWeatherByCoords(lat, lon) {
     }
 }
 
+// ---------- 5-Day Forecast ----------
 function showForecastError(message) {
     var forecastSection = document.getElementById('forecastSection');
     var forecastContainer = document.getElementById('forecastContainer');
@@ -302,6 +326,7 @@ async function fetchFiveDayForecastByCoords(lat, lon) {
     }
 }
 
+// ---------- Recent Searches ----------
 function saveCityToStorage(cityName) {
     if (cityName === undefined || cityName === null || cityName === "") {
         return;
@@ -334,6 +359,7 @@ function loadRecentCities() {
     } else {
         cities = JSON.parse(cities);
     }
+    // Clear existing options except placeholder
     while (recentSelect.options.length > 1) {
         recentSelect.remove(1);
     }
@@ -360,3 +386,15 @@ function onRecentCitySelected() {
         recentSelect.value = "";
     }
 }
+
+// ---------- Clear Recent Cities ----------
+function clearRecentCities() {
+    localStorage.removeItem('recentCities');
+    var recentSelect = document.getElementById('recentSelect');
+    while (recentSelect.options.length > 1) {
+        recentSelect.remove(1);
+    }
+    var recentContainer = document.getElementById('recentContainer');
+    recentContainer.classList.add('hidden');
+}
+
