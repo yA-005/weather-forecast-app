@@ -261,7 +261,7 @@ function displayForecast(dailyForecasts) {
             <p class="font-semibold text-gray-700">${dayName}</p>
             <p class="text-xs text-gray-500">${monthDay}</p>
             <img src="${iconUrl}" alt="weather icon" class="w-12 h-12 mx-auto my-2">
-            <p class="text-lg font-bold text-blue-600">${Math.round(day.temp)}°C</p>
+            <p class="text-lg font-bold text-blue-600">🌡️ ${Math.round(day.temp)}°C</p>
             <p class="text-sm text-gray-600">🌬️ ${Math.round(day.wind)} m/s</p>
             <p class="text-sm text-gray-600">💧 ${day.humidity}%</p>
         `;
