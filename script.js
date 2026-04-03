@@ -1,21 +1,23 @@
 
 
+// OpenWeatherMap API key (replace with your own)
 var API_KEY = '9143f882f9b5c6f5c3b164d38ca52005'; 
+// Track temperature unit: true = Celsius, false = Fahrenheit
 var isCelsius = true;   
+// Store the current temperature in Celsius for unit toggling
 var currentCelsiusTemp = null;  
 
-// ---------- DOM Content Loaded ----------
+// ---------- DOM Content Loaded: set up event listeners ----------
 document.addEventListener('DOMContentLoaded', function() {
+    // Get references to DOM elements
     var cityInput = document.getElementById('cityInput');
     var searchBtn = document.getElementById('searchBtn');
     var locationBtn = document.getElementById('locationBtn');
     var unitToggle = document.getElementById('unitToggle');
-    var weatherInfo = document.getElementById('weatherInfo');
-    var errorMsg = document.getElementById('errorMsg');
     var recentSelect = document.getElementById('recentSelect');
     var clearRecentBtn = document.getElementById('clearRecentBtn');
 
-    // Search button click
+    // Search button: validate input, then fetch weather and forecast
     searchBtn.addEventListener('click', function() {
         var city = cityInput.value.trim();
         if (city === "") {
@@ -27,30 +29,32 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchFiveDayForecast(city);
     });
 
-    // My Location button click
+    // My Location button: use browser geolocation
     locationBtn.addEventListener('click', function() {
         getLocationAndFetchWeather();
     });
 
-    // Unit toggle button click
+    // Unit toggle: switch between °C and °F for current temperature only
     unitToggle.addEventListener('click', function() {
         toggleTemperatureUnit();
     });
 
-    // Recent cities dropdown change
+    // When user selects a city from the recent dropdown, fetch its weather
     recentSelect.addEventListener('change', onRecentCitySelected);
 
-    // Clear recent cities button click
+    // Clear recent cities button: remove all stored cities
     if (clearRecentBtn !== null) {
         clearRecentBtn.addEventListener('click', function() {
             clearRecentCities();
         });
     }
 
-    loadRecentCities(); // load recent cities from localStorage on startup
+    // Load any previously stored recent cities from localStorage
+    loadRecentCities();
 });
 
 // ---------- Helper Functions ----------
+// Show/hide the loading spinner
 function showLoading(show) {
     var spinner = document.getElementById('loadingSpinner');
     if (show === true) {
@@ -60,6 +64,7 @@ function showLoading(show) {
     }
 }
 
+// Display an error message in the styled error div (no alert())
 function showError(message) {
     var errorMsg = document.getElementById('errorMsg');
     var weatherInfo = document.getElementById('weatherInfo');
@@ -69,18 +74,20 @@ function showError(message) {
     showLoading(false);
 }
 
+// Hide the error message div
 function hideError() {
     var errorMsg = document.getElementById('errorMsg');
     errorMsg.classList.add('hidden');
 }
 
-// ---------- Dynamic Background ----------
+// ---------- Dynamic Background (changes with weather condition) ----------
 function updateBackground(condition) {
     var body = document.getElementById('appBody');
-    // Reset classes
+    // Reset classes to avoid conflicts
     body.className = '';
     body.classList.add('min-h-screen', 'flex', 'items-center', 'justify-center', 'p-4', 'transition-all', 'duration-500');
 
+    // Apply gradient based on condition (full if-else, no shorthand)
     if (condition === 'Clear') {
         body.classList.add('bg-gradient-to-br', 'from-yellow-400', 'to-orange-500');
     } else if (condition === 'Clouds') {
@@ -97,7 +104,7 @@ function updateBackground(condition) {
     }
 }
 
-// ---------- Extreme Temperature Alert ----------
+// ---------- Extreme Temperature Alert (>=40°C or <=0°C) ----------
 function showExtremeAlert(tempCelsius) {
     var alertBanner = document.getElementById('alertBanner');
     var alertText = document.getElementById('alertText');
@@ -112,13 +119,14 @@ function showExtremeAlert(tempCelsius) {
     }
 }
 
-// ---------- Display Current Weather ----------
+// ---------- Display Current Weather (populates the weather card) ----------
 function displayWeather(data) {
     var weatherInfo = document.getElementById('weatherInfo');
     var errorMsg = document.getElementById('errorMsg');
     errorMsg.classList.add('hidden');
     hideError();
 
+    // Extract data from API response
     var tempC = data.main.temp;
     var humidity = data.main.humidity;
     var windSpeed = data.wind.speed;
@@ -128,12 +136,16 @@ function displayWeather(data) {
     var iconUrl = 'https://openweathermap.org/img/wn/' + iconCode + '@2x.png';
     var condition = data.weather[0].main;
 
+    // Store for unit toggle
     currentCelsiusTemp = tempC;
+    // Update background and alert based on weather
     updateBackground(condition);
     showExtremeAlert(tempC);
 
+    // Format temperature according to current unit
     var displayTemp = isCelsius ? Math.round(tempC) + '°C' : Math.round((tempC * 9/5) + 32) + '°F';
 
+    // Inject HTML into the weather card
     weatherInfo.innerHTML = `
         <div class="flex items-center justify-between">
             <h2 class="text-2xl font-bold text-gray-800">${cityName}</h2>
@@ -152,7 +164,7 @@ function displayWeather(data) {
     showLoading(false);
 }
 
-// ---------- Temperature Unit Toggle ----------
+// ---------- Temperature Unit Toggle (only for current temperature) ----------
 function toggleTemperatureUnit() {
     if (currentCelsiusTemp === null || currentCelsiusTemp === undefined) {
         return; // No weather data yet
@@ -168,11 +180,12 @@ function toggleTemperatureUnit() {
     }
 }
 
-// ---------- Current Weather by City ----------
+// ---------- Current Weather by City Name ----------
 async function fetchWeather(city) {
     var url = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + API_KEY + '&units=metric';
     try {
         var response = await fetch(url);
+        // Check if response is not OK (full condition, no ! operator)
         if (response.ok === false) {
             if (response.status === 404) {
                 throw new Error('City not found. Please check the name.');
@@ -182,6 +195,7 @@ async function fetchWeather(city) {
         }
         var data = await response.json();
         displayWeather(data);
+        // Save this city to recent searches and refresh dropdown
         saveCityToStorage(city);
         loadRecentCities();
     } catch (error) {
@@ -190,8 +204,9 @@ async function fetchWeather(city) {
     }
 }
 
-// ---------- Current Weather by Coordinates (Geolocation) ----------
+// ---------- Current Weather by Geolocation ----------
 function getLocationAndFetchWeather() {
+    // Check if browser supports geolocation
     if (navigator.geolocation === undefined) {
         showError("Geolocation is not supported by your browser.");
         return;
@@ -205,6 +220,7 @@ function getLocationAndFetchWeather() {
             fetchWeatherByCoords(lat, lon);
         },
         function(error) {
+            // Handle different geolocation errors
             if (error.code === error.PERMISSION_DENIED) {
                 showError("Location permission denied. Please enable location services.");
             } else if (error.code === error.POSITION_UNAVAILABLE) {
@@ -219,6 +235,7 @@ function getLocationAndFetchWeather() {
     );
 }
 
+// Fetch weather using latitude and longitude
 async function fetchWeatherByCoords(lat, lon) {
     var url = 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=' + API_KEY + '&units=metric';
     try {
@@ -228,7 +245,7 @@ async function fetchWeatherByCoords(lat, lon) {
         }
         var data = await response.json();
         displayWeather(data);
-      
+        // Also fetch 5-day forecast for these coordinates
         fetchFiveDayForecastByCoords(lat, lon);
     } catch (error) {
         showError(error.message);
@@ -236,7 +253,8 @@ async function fetchWeatherByCoords(lat, lon) {
     }
 }
 
-// ---------- 5-Day Forecast ----------
+// ---------- 5-Day Forecast Functions ----------
+// Display forecast error inside the forecast section
 function showForecastError(message) {
     var forecastSection = document.getElementById('forecastSection');
     var forecastContainer = document.getElementById('forecastContainer');
@@ -245,6 +263,7 @@ function showForecastError(message) {
     showLoading(false);
 }
 
+// Render forecast cards from processed daily data
 function displayForecast(dailyForecasts) {
     var forecastSection = document.getElementById('forecastSection');
     var forecastContainer = document.getElementById('forecastContainer');
@@ -257,6 +276,7 @@ function displayForecast(dailyForecasts) {
         var dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
         var monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         var iconUrl = 'https://openweathermap.org/img/wn/' + day.icon + '.png';
+        // Each card shows: day, date, weather icon, temperature, wind, humidity
         card.innerHTML = `
             <p class="font-semibold text-gray-700">${dayName}</p>
             <p class="text-xs text-gray-500">${monthDay}</p>
@@ -271,6 +291,7 @@ function displayForecast(dailyForecasts) {
     showLoading(false);
 }
 
+// Process raw API forecast data into daily summaries (pick reading closest to noon)
 function processForecastData(data) {
     var dailyMap = {};
     for (var i = 0; i < data.list.length; i++) {
@@ -278,6 +299,7 @@ function processForecastData(data) {
         var date = new Date(item.dt * 1000);
         var dateKey = date.toDateString();
         var hour = date.getHours();
+        // If this day not yet recorded, or this reading is closer to noon (12:00) than the previous one
         if (dailyMap[dateKey] === undefined || Math.abs(hour - 12) < Math.abs(dailyMap[dateKey].hour - 12)) {
             dailyMap[dateKey] = {
                 dt: item.dt,
@@ -291,9 +313,10 @@ function processForecastData(data) {
     }
     var days = Object.values(dailyMap);
     days.sort(function(a, b) { return a.dt - b.dt; });
-    return days.slice(0, 5);
+    return days.slice(0, 5); // Return only first 5 days
 }
 
+// Fetch 5-day forecast by city name
 async function fetchFiveDayForecast(city) {
     var url = 'https://api.openweathermap.org/data/2.5/forecast?q=' + city + '&appid=' + API_KEY + '&units=metric';
     try {
@@ -309,6 +332,7 @@ async function fetchFiveDayForecast(city) {
     }
 }
 
+// Fetch 5-day forecast by coordinates (used after geolocation)
 async function fetchFiveDayForecastByCoords(lat, lon) {
     var url = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + API_KEY + '&units=metric';
     try {
@@ -324,7 +348,8 @@ async function fetchFiveDayForecastByCoords(lat, lon) {
     }
 }
 
-// ---------- Recent Searches ----------
+// ---------- Recent Searches (localStorage) ----------
+// Save a city to localStorage, keep only last 5 unique entries
 function saveCityToStorage(cityName) {
     if (cityName === undefined || cityName === null || cityName === "") {
         return;
@@ -335,12 +360,14 @@ function saveCityToStorage(cityName) {
     } else {
         cities = JSON.parse(cities);
     }
+    // Remove duplicate if exists
     var filtered = [];
     for (var i = 0; i < cities.length; i++) {
         if (cities[i].toLowerCase() !== cityName.toLowerCase()) {
             filtered.push(cities[i]);
         }
     }
+    // Add new city at the beginning
     filtered.unshift(cityName);
     if (filtered.length > 5) {
         filtered.pop();
@@ -348,6 +375,7 @@ function saveCityToStorage(cityName) {
     localStorage.setItem('recentCities', JSON.stringify(filtered));
 }
 
+// Load recent cities from localStorage and populate the dropdown
 function loadRecentCities() {
     var recentContainer = document.getElementById('recentContainer');
     var recentSelect = document.getElementById('recentSelect');
@@ -357,7 +385,7 @@ function loadRecentCities() {
     } else {
         cities = JSON.parse(cities);
     }
-    // Clear existing options except placeholder
+    // Clear existing options except the placeholder
     while (recentSelect.options.length > 1) {
         recentSelect.remove(1);
     }
@@ -367,6 +395,7 @@ function loadRecentCities() {
         option.textContent = cities[i];
         recentSelect.appendChild(option);
     }
+    // Show dropdown only if there are cities
     if (cities.length > 0) {
         recentContainer.classList.remove('hidden');
     } else {
@@ -374,6 +403,7 @@ function loadRecentCities() {
     }
 }
 
+// When user selects a city from the dropdown, fetch its weather and forecast
 function onRecentCitySelected() {
     var recentSelect = document.getElementById('recentSelect');
     var selectedCity = recentSelect.value;
@@ -381,11 +411,11 @@ function onRecentCitySelected() {
         showLoading(true);
         fetchWeather(selectedCity);
         fetchFiveDayForecast(selectedCity);
-        recentSelect.value = "";
+        recentSelect.value = ""; // reset to placeholder
     }
 }
 
-// ---------- Clear Recent Cities ----------
+// Clear all recent cities from localStorage and hide dropdown
 function clearRecentCities() {
     localStorage.removeItem('recentCities');
     var recentSelect = document.getElementById('recentSelect');
