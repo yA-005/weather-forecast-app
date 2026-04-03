@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Weather Forecast App</title>
-    <script src="<https://cdn.tailwindcss.com>"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body id="appBody" class="bg-gradient-to-br from-blue-400 to-purple-500 min-h-screen flex items-center justify-center p-4 transition-all duration-500">
@@ -34,13 +34,15 @@
             </button>
         </div>
 
-        <!-- Recent Cities Dropdown -->
+        <!-- Recent Cities Dropdown (improved layout) -->
         <div id="recentContainer" class="mb-4 hidden">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Recent Cities:</label>
-            <button id="clearRecentBtn" 
-                class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition">
-            🗑️ Clear
-            </button>
+            <div class="flex items-center justify-between mb-1">
+                <label class="text-sm font-medium text-gray-700">Recent Cities:</label>
+                <button id="clearRecentBtn" 
+                        class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition">
+                    🗑️ Clear
+                </button>
+            </div>
             <select id="recentSelect" class="w-full p-2 border border-gray-300 rounded-xl bg-white">
                 <option value="">-- Select a city --</option>
             </select>
@@ -68,7 +70,7 @@
             </div>
         </div>
 
-        <!-- Loading Spinner  -->
+        <!-- Loading Spinner -->
         <div id="loadingSpinner" class="hidden text-center py-4">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
             <p class="mt-2 text-gray-600">Loading...</p>
