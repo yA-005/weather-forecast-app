@@ -1,7 +1,5 @@
 
 
-
-
 var API_KEY = '9143f882f9b5c6f5c3b164d38ca52005'; 
 var isCelsius = true;   
 var currentCelsiusTemp = null;  
@@ -397,4 +395,3 @@ function clearRecentCities() {
     var recentContainer = document.getElementById('recentContainer');
     recentContainer.classList.add('hidden');
 }
-
